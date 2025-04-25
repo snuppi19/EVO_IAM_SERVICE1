@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
-    private static final Long EXPIRATION_TIME_TOKEN = 3600000L;//1 giờ
-    private static final Long EXPIRATION_TIME_REFRESH_TOKEN = 604800000L;// 7 ngày
+    private static final long EXPIRATION_TIME_TOKEN = 3600000L;//1 giờ
+    private static final long EXPIRATION_TIME_REFRESH_TOKEN = 604800000L;// 7 ngày
     private final RSAKeyUtil rsaKeyUtil;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final StringRedisTemplate redisTemplate;
