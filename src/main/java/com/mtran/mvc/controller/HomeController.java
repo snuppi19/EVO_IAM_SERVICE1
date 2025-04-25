@@ -38,7 +38,7 @@ public class HomeController {
             User user = userDetails.getUser();
             return userMapper.toUserDTO(user);
         } catch (Exception e) {
-            throw new RuntimeException("Invalid or expired token: " + e.getMessage());
+            throw new RuntimeException("Token không hợp lệ hoặc đã hết hạn : " + e.getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ public class HomeController {
         userService.updateUser(userDTO);
         userActivityLogService.logActivity(userDTO.getEmail(), ActivityType.UPDATE_PROFILE,
                 "user update profile", request);
-        return ResponseEntity.ok("Update user successfully");
+        return ResponseEntity.ok("User cập nhật thông tin thành công!");
     }
 
     @PutMapping("/change-password")
@@ -68,13 +68,13 @@ public class HomeController {
             try {
                 jwtUtil.logout(logoutRequest);
             } catch (Exception e) {
-                System.out.println("Error invalidating tokens: " + e.getMessage());
+                System.out.println("Token không hợp lệ : " + e.getMessage());
             }
         }
 
         userActivityLogService.logActivity(changePasswordRequest.getUserDTO().getEmail(),
                 ActivityType.CHANGE_PASSWORD,"user change password", request);
-        return ResponseEntity.ok("Change password successfully");
+        return ResponseEntity.ok("User thay đổi mật khẩu thành công !");
     }
 
     @PostMapping("/upload-image")
@@ -89,6 +89,6 @@ public class HomeController {
         userDTO.setImageUrl(imageUrl);
         userService.updateUser(userDTO);
         userActivityLogService.logActivity(userDTO.getEmail(), ActivityType.UPLOAD_IMAGE, "user uploaded profile image", request);
-        return ResponseEntity.ok("Upload image successfully");
+        return ResponseEntity.ok("Tải ảnh thành công");
     }
 }
