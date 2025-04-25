@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
+    private static final Long EXPIRATION_TIME_TOKEN = 3600000L;//1 giờ
+    private static final Long EXPIRATION_TIME_REFRESH_TOKEN = 604800000L;// 7 ngày
     private final RSAKeyUtil rsaKeyUtil;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final StringRedisTemplate redisTemplate;
@@ -39,7 +41,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 giờ
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_TOKEN))
                 .setId(UUID.randomUUID().toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
@@ -51,7 +53,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) // 7 ngày
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_REFRESH_TOKEN))
                 .setId(UUID.randomUUID().toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
