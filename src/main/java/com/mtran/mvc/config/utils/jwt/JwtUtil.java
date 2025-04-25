@@ -10,27 +10,32 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
     private final RSAKeyUtil rsaKeyUtil;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
+    private final StringRedisTemplate redisTemplate;
 
     public JwtUtil(RSAKeyUtil rsaKeyUtil, InvalidatedTokenRepository invalidatedTokenRepository,
-                   UserRepository userRepository) {
+                   UserRepository userRepository, StringRedisTemplate redisTemplate) {
         this.rsaKeyUtil = rsaKeyUtil;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     // tao token
     public String generateToken(String username) throws Exception {
         PrivateKey privateKey = rsaKeyUtil.getPrivateKey();
+
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
@@ -52,7 +57,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // refresh token ( email duoc dung lam usernam)
+    //  refresh access token ( email duoc dung lam usernam)
     public String refreshToken(RefreshRequest refreshRequest) throws Exception {
         var signJWT = validateToken(refreshRequest.getToken());
         String jit = signJWT.getId();
@@ -77,9 +82,13 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
+        /*
         if (invalidatedTokenRepository.existsById(claims.getId())) {
             throw new RuntimeException("Token is invalid");
+        }
+        */
+        if (Boolean.TRUE.equals(redisTemplate.hasKey("invalid_token:" + claims.getId()))) {
+            throw new RuntimeException("Token khong con hop le");
         }
         return claims;
     }
@@ -89,24 +98,33 @@ public class JwtUtil {
         //access token
         if (request.getToken() != null) {
             var signToken = validateToken(request.getToken());
+
             String jit = signToken.getId();
             Date expiryTime = signToken.getExpiration();
+            /* CÁCH LƯU BLACKLIST DATABASE
             InvalidateToken invalidateToken = InvalidateToken.builder()
                     .id(jit)
                     .expiryTime(expiryTime)
                     .build();
             invalidatedTokenRepository.save(invalidateToken);
+             */
+            long TTL = (expiryTime.getTime() - System.currentTimeMillis()) / 1000;
+            redisTemplate.opsForValue().set("invalid_token:" + jit, jit, TTL, TimeUnit.SECONDS);
         }
         //refresh token
         if (request.getRefreshToken() != null) {
             var refreshSignToken = validateToken(request.getRefreshToken());
             String refreshJit = refreshSignToken.getId();
             Date refreshExpiryTime = refreshSignToken.getExpiration();
+            /*  CÁCH LƯU BLACKLIST DATABASE
             InvalidateToken refreshInvalidateToken = InvalidateToken.builder()
                     .id(refreshJit)
                     .expiryTime(refreshExpiryTime)
                     .build();
             invalidatedTokenRepository.save(refreshInvalidateToken);
+             */
+            long TTL = (refreshExpiryTime.getTime() - System.currentTimeMillis()) / 1000;
+            redisTemplate.opsForValue().set("invalid_token:" + refreshJit, refreshJit, TTL, TimeUnit.SECONDS);
         }
     }
 
