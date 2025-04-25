@@ -20,7 +20,7 @@ public class OtpService {
 
         //lock
         if (Boolean.TRUE.equals(redisTemplate.hasKey(lockKey))) {
-            throw new RuntimeException("Please wait enough " + RESEND_OTP_TIME + " seconds");
+            throw new RuntimeException("Làm ơn chờ " + RESEND_OTP_TIME + " giây");
         }
 
         // Tạo OTP
