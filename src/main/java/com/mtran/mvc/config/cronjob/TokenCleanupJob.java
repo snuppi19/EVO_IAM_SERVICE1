@@ -8,13 +8,14 @@ import java.util.Date;
 
 @Component
 public class TokenCleanupJob {
+    private static final Integer EXPIRY_TIME_IN_SECONDS_CRONJOB = 86400000;// 1 ngày
     private final InvalidatedTokenRepository invalidatedTokenRepository;
 
     public TokenCleanupJob(InvalidatedTokenRepository invalidatedTokenRepository) {
         this.invalidatedTokenRepository = invalidatedTokenRepository;
     }
 
-    @Scheduled(fixedRate = 86400000)// 1 ngày
+    @Scheduled(fixedRate = EXPIRY_TIME_IN_SECONDS_CRONJOB)
     public void cleanUpExpiredToken(){
         Date date=new Date();
         invalidatedTokenRepository.deleteByExpiryTimeBefore();

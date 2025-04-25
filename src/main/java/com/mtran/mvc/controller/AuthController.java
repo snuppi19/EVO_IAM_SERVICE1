@@ -45,7 +45,6 @@ public class AuthController {
         if (!passwordEncoder.matches(password, userDTO.getPassword())) {
             throw new RuntimeException("Mật khẩu không đúng!");
         }
-
         try {
             String accessToken = jwtUtil.generateToken(username);
             String refreshToken = jwtUtil.generateRefreshToken(username);
@@ -69,7 +68,6 @@ public class AuthController {
     public String refresh(@RequestBody RefreshRequest refreshRequest) throws Exception {
         return jwtUtil.refreshToken(refreshRequest);
     }
-
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO,HttpServletRequest request) {

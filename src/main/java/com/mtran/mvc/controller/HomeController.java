@@ -81,7 +81,7 @@ public class HomeController {
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
                                          Authentication authentication,
                                          HttpServletRequest request) throws IOException {
-       String imageUrl=uploadImageFile.uploadImageFile(file);
+        String imageUrl=uploadImageFile.uploadImageFile(file);
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user=userDetails.getUser();
 
