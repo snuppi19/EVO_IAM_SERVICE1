@@ -4,6 +4,7 @@ import com.mtran.mvc.config.utils.RSAKeyUtil;
 import com.mtran.mvc.dto.request.LogoutRequest;
 import com.mtran.mvc.dto.request.RefreshRequest;
 import com.mtran.mvc.entity.InvalidateToken;
+import com.mtran.mvc.entity.User;
 import com.mtran.mvc.repository.InvalidatedTokenRepository;
 import com.mtran.mvc.repository.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -24,13 +27,15 @@ public class JwtUtil {
     private static final long EXPIRATION_TIME_TOKEN = 3600000L;//1 giờ
     private static final long EXPIRATION_TIME_REFRESH_TOKEN = 604800000L;// 7 ngày
     private final RSAKeyUtil rsaKeyUtil;
+    private final UserRepository userRepository;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final StringRedisTemplate redisTemplate;
 
     public JwtUtil(RSAKeyUtil rsaKeyUtil, InvalidatedTokenRepository invalidatedTokenRepository,
-                   UserRepository userRepository, StringRedisTemplate redisTemplate) {
+                   UserRepository userRepository, UserRepository userRepository1, StringRedisTemplate redisTemplate) {
         this.rsaKeyUtil = rsaKeyUtil;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
+        this.userRepository = userRepository1;
         this.redisTemplate = redisTemplate;
     }
 
@@ -91,6 +96,18 @@ public class JwtUtil {
         */
         if (Boolean.TRUE.equals(redisTemplate.hasKey("invalid_token:" + claims.getId()))) {
             throw new RuntimeException("Token khong con hop le");
+        }
+        String email = claims.getSubject();
+        User user = userRepository.findByEmail(email);
+        LocalDateTime lastChangePassword = user.getLastChangePassword();
+        if (lastChangePassword != null) {
+            Date issuedAt = claims.getIssuedAt();
+            LocalDateTime issuedAtTime = issuedAt.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+            if (issuedAtTime.isBefore(lastChangePassword)) {
+                throw new RuntimeException("Token không hợp lệ do mật khẩu thay đổi");
+            }
         }
         return claims;
     }

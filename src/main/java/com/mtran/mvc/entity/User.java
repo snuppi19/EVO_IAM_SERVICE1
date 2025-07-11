@@ -37,6 +37,8 @@ public class User {
     private String address;
     @Column(name = "image_url", nullable = true, columnDefinition = "VARCHAR(255)")
     private String imageUrl;
+    @Column(name = "last_change_password", nullable = true)
+    private LocalDateTime lastChangePassword;
     @CreatedBy
     @Column(name = "created_by", updatable = false)
     private String createdBy;
@@ -49,4 +51,6 @@ public class User {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedDate;
+    //UserId từ keycloak
+    String UserKeycloakId;
 }

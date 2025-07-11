@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Component
 public class TokenCleanupJob {
-    private static final Integer EXPIRY_TIME_IN_SECONDS_CRONJOB = 86400000;// 1 ngày
+    private static final int EXPIRY_TIME_IN_SECONDS_CRONJOB = 86400000;// 1 ngày
     private final InvalidatedTokenRepository invalidatedTokenRepository;
 
     public TokenCleanupJob(InvalidatedTokenRepository invalidatedTokenRepository) {

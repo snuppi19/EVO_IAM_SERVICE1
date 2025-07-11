@@ -10,6 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -68,5 +71,18 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public void updateLastChangePassword(String email, LocalDateTime lastChangePassword) {
+        User user = userRepository.findByEmail(email);
+        user.setLastChangePassword(lastChangePassword);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+       List<User> users = userRepository.findAll();
+       return users.stream().map(userMapper::toUserDTO).toList();
     }
 }
