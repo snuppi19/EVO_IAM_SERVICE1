@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 
 @RestController
@@ -57,7 +58,8 @@ public class HomeController {
         userService.changePassword(changePasswordRequest.getUserDTO().getEmail(),
                 changePasswordRequest.getUserDTO().getPassword(),
                 changePasswordRequest.getNewPassword());
-
+        // Luu thoi gian password bi doi
+        userService.updateLastChangePassword(changePasswordRequest.getUserDTO().getEmail(), LocalDateTime.now());
         String token = changePasswordRequest.getToken();
         String refreshToken = changePasswordRequest.getRefreshToken();
 
