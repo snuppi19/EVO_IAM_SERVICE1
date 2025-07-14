@@ -21,7 +21,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t iam-service:latest .'
+                sh 'docker build -t Keycloak_mini:latest .'
             }
         }
     }
