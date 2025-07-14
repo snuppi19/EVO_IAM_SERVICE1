@@ -1,0 +1,43 @@
+
+services:
+  iam:
+    build: .
+    image: keycloak-mini:latest
+    container_name: iam-container
+    networks:
+      - jk-network
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-container:5432/IAMservice
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=01092004
+      - SPRING_DATA_REDIS_HOST=redis-container
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_MAIL_USERNAME=tuanminhlienbao@gmail.com
+      - SPRING_MAIL_PASSWORD=djju zgni chbh whby
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    networks:
+      - jk-network
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=01092004
+      - POSTGRES_DB=IAMservice
+
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    networks:
+      - jk-network
+    ports:
+      - "6379:6379"
+
+networks:
+  jk-network:
+    external: true
