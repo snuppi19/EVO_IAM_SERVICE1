@@ -32,18 +32,27 @@ pipeline {
                 }
             }
         }
-        stage('Check Docker') {
-            steps {
-                sh 'docker version'
-            }
-        }
+        stage('Run Application') {
+                    steps {
+                        script {
+                            // Chạy file .jar đã build (giả sử nằm trong target/)
+                            sh 'java -jar target/IAM_Service_1-0.0.1-SNAPSHOT.jar &'
+                            // Lưu PID để tắt sau này (tùy chọn)
+                            sh 'echo $! > app.pid'
+                        }
+                    }
+                }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t keycloak_mini:latest .'
-            }
-        }
-
+        stage('Shutdown and Clean') {
+                    steps {
+                        script {
+                            // Tắt ứng dụng nếu đang chạy
+                            sh 'if [ -f app.pid ]; then kill $(cat app.pid) && rm app.pid; fi'
+                            // Dọn dẹp file build (tùy chọn)
+                            sh 'rm -rf target/*'
+                        }
+                    }
+                }
     }
 
     post {
